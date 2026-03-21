@@ -4,6 +4,7 @@ const getDateRange = require("../utils/dateFilter.js");
 
 // ================= ADD EXPENSE =================
 const addExpense = async (req, res) => {
+   const userId=req.user._id;
   try {
     const { description, amount, category, date } = req.body;
 
@@ -51,11 +52,11 @@ const getAllExpense = async (req, res) => {
 const updateExpense=async (req,res) =>{
     const {id}=req.params;
     const userId=req.user._id;
-    const{description,amount}=req.body;
+    const{description,amount,category,data}=req.body;
     try{
         const updatedExpense=await expenseModel.findOneAndUpdate(
             {_id:id,userId},
-            {description,amount},
+            {description,amount,category,date},
             {new:true}
         );
         if(!updatedExpense){
@@ -79,10 +80,10 @@ const updateExpense=async (req,res) =>{
 // ================= DELETE EXPENSE =================
 const deleteExpense = async (req, res) => {
   try {
-    const expense = await expenseModel.findByIdAndDelete({
-      _id: req.params.id,
+    const expense = await expenseModel.findByIdAndDelete(
+       req.params.id,
     
-    });
+    );
 
 
     if (!expense) {
@@ -123,7 +124,7 @@ const downloadExpenseExcel = async (req, res) => {
 
     XLSX.utils.book_append_sheet(workbook, worksheet, "expenseModel");
 
-     XLSX.write(workbook,"Expense_details.xlsx");
+     XLSX.writeFile(workbook,"Expense_details.xlsx");
 
    
 

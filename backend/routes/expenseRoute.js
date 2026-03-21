@@ -15,22 +15,22 @@ const expressRouter = express.Router();
 
 // ================= ROUTES =================
 
-// ➕ Add Expense
+//  Add Expense
 expressRouter.post("/add", authMiddleware, addExpense);
 
-// 📄 Get All Expense
+//  Get All Expense
 expressRouter.get("/get", authMiddleware, getAllExpense);
 
-// ✏️ Update Expense
+//  Update Expense
 expressRouter.put("/update/:id", authMiddleware, updateExpense);
 
-// ❌ Delete Expense
+//  Delete Expense
 expressRouter.delete("/delete/:id", authMiddleware, deleteExpense);
 
-// 📥 Download Excel
+//  Download Excel
 expressRouter.get("/download", authMiddleware, downloadExpenseExcel);
 
-// 📊 Overview
+//  Overview
 expressRouter.get("/overview", authMiddleware, getExpenseOverview);
 
 module.exports = expressRouter;

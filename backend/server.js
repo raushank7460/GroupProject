@@ -4,6 +4,7 @@ const connectDB = require("./config/db.js");
 const userRouter = require("./routes/userRoute.js"); 
 const incomeRouter = require("./routes/incomeRoute.js");
 const expenseRouter = require("./routes/expenseRoute.js");
+const dashboardRouter = require("./routes/dashboardRoute.js");
 
 require("dotenv").config();
 
@@ -22,6 +23,7 @@ connectDB();
 app.use("/api/user", userRouter);
 app.use("/api/income", incomeRouter);
 app.use("/api/expense", expenseRouter);
+app.use("/api/dashboard",dashboardRouter);
 
 app.get("/", (req, res) => {
   res.send("API Working");
