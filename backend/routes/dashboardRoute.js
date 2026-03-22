@@ -4,7 +4,7 @@ const { getDashboardOverview } = require("../controllers/dashboardController.js"
 
 const dashboardRouter = express.Router();
 
-// ================= ROUTES =================
+//  ROUTES 
 
 // Dashboard Overview
 dashboardRouter.get("/", authMiddleware, getDashboardOverview);

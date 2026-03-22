@@ -2,7 +2,7 @@ const XLSX = require("xlsx");
 const incomeModel = require("../models/incomeModel.js");
 const  getDateRange=require("../utils/dateFilter.js");
 
-// ================= ADD INCOME =================
+//  ADD INCOME 
 const addIncome = async (req, res) => {
     const userId=req.user._id;
     const { description, amount, category, date } = req.body;
@@ -38,7 +38,7 @@ const addIncome = async (req, res) => {
   }
 };
 
-// ================= GET ALL INCOME =================
+// GET ALL INCOME 
 const getAllIncome = async (req, res) => {
     const userId=req.user._id;
   try {
@@ -55,7 +55,7 @@ const getAllIncome = async (req, res) => {
   }
 };
 
-// ================= update INCOME =================
+//  update INCOME 
 const updateIncome=async (req,res) =>{
     const {id}=req.params;
     const userId=req.user._id;
@@ -84,7 +84,7 @@ const updateIncome=async (req,res) =>{
     
     
 }
-// ================= DELETE INCOME =================
+//  DELETE INCOME 
 const deleteIncome = async (req, res) => {
   try {
     const income = await incomeModel.findByIdAndDelete({
@@ -152,7 +152,7 @@ const downloadIncomeExcel = async (req, res) => {
 
 
 
-// ================= INCOME OVERVIEW =================
+//  INCOME OVERVIEW 
 const getIncomeOverview = async (req, res) => {
   try {
     const userId = req.user._id;

@@ -10,7 +10,7 @@ const TOKEN_EXPIRES = "24h";
 const createToken = (userId) =>
   jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: TOKEN_EXPIRES });
 
-// ================= REGISTER =================
+//  REGISTER 
 const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -62,7 +62,7 @@ const registerUser = async (req, res) => {
   }
 };
 
-// ================= LOGIN =================
+//  LOGIN 
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -105,7 +105,7 @@ const loginUser = async (req, res) => {
   }
 };
 
-// ================= GET CURRENT USER =================
+//  GET CURRENT USER 
 const getCurrentUser = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("name email");
@@ -126,7 +126,7 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
-// ================= UPDATE PROFILE =================
+//  UPDATE PROFILE 
 const updateProfile = async (req, res) => {
   const { name, email } = req.body;
 
@@ -162,7 +162,7 @@ const updateProfile = async (req, res) => {
   }
 };
 
-// ================= UPDATE PASSWORD =================
+//  UPDATE PASSWORD 
 const updatePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
@@ -206,7 +206,7 @@ const updatePassword = async (req, res) => {
   }
 };
 
-// ================= EXPORT =================
+//  EXPORT 
 module.exports = {
   registerUser,
   loginUser,

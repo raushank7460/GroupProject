@@ -12,24 +12,24 @@ const {
 
 const incomeRouter = express.Router();
 
-// ================= ROUTES =================
+//  ROUTES 
 
-// ➕ Add Income
+//  Add Income
 incomeRouter.post("/add", authMiddleware, addIncome);
 
-// 📄 Get All Income
+//  Get All Income
 incomeRouter.get("/get", authMiddleware, getAllIncome);
 
-// ✏️ Update Income
+//  Update Income
 incomeRouter.put("/update/:id", authMiddleware, updateIncome);
 
-// ❌ Delete Income
+//  Delete Income
 incomeRouter.delete("/delete/:id", authMiddleware, deleteIncome);
 
-// 📥 Download Excel
+//  Download Excel
 incomeRouter.get("/download", authMiddleware, downloadIncomeExcel);
 
-// 📊 Income Overview (filter: daily/weekly/monthly/yearly)
+//  Income Overview (filter: daily/weekly/monthly/yearly)
 incomeRouter.get("/overview", authMiddleware, getIncomeOverview);
 
 module.exports = incomeRouter;

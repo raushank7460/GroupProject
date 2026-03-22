@@ -13,7 +13,7 @@ const {
 
 const expressRouter = express.Router();
 
-// ================= ROUTES =================
+//  ROUTES 
 
 //  Add Expense
 expressRouter.post("/add", authMiddleware, addExpense);

@@ -2,7 +2,7 @@ const expenseModel = require("../models/expenseModel.js");
 const XLSX = require("xlsx");
 const getDateRange = require("../utils/dateFilter.js");
 
-// ================= ADD EXPENSE =================
+// ADD EXPENSE 
 const addExpense = async (req, res) => {
    const userId=req.user._id;
   try {
@@ -30,7 +30,7 @@ const addExpense = async (req, res) => {
   }
 };
 
-// ================= GET ALL EXPENSE =================
+// GET ALL EXPENSE 
 const getAllExpense = async (req, res) => {
     const userId=req.user._id;
   try {
@@ -48,7 +48,7 @@ const getAllExpense = async (req, res) => {
 };
 
 
-// ================= UPDATE EXPENSE =================
+//  UPDATE EXPENSE 
 const updateExpense=async (req,res) =>{
     const {id}=req.params;
     const userId=req.user._id;
@@ -77,7 +77,7 @@ const updateExpense=async (req,res) =>{
     
     
 }
-// ================= DELETE EXPENSE =================
+// DELETE EXPENSE 
 const deleteExpense = async (req, res) => {
   try {
     const expense = await expenseModel.findByIdAndDelete(
@@ -105,7 +105,7 @@ const deleteExpense = async (req, res) => {
   }
 };
 
-// ================= DOWNLOAD EXCEL =================
+// DOWNLOAD EXCEL
 const downloadExpenseExcel = async (req, res) => {
   try {
     const expense = await expenseModel
@@ -137,7 +137,7 @@ const downloadExpenseExcel = async (req, res) => {
   }
 };
 
-// ================= EXPENSE OVERVIEW =================
+//  EXPENSE OVERVIEW 
 
 const getExpenseOverview = async (req, res) => {
   try {
