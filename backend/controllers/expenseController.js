@@ -48,7 +48,7 @@ const getAllExpense = async (req, res) => {
 };
 
 
-//  UPDATE EXPENSE 
+//  update Expense
 const updateExpense = async (req, res) => {
   const { id } = req.params;
   const userId = req.user._id;
@@ -81,7 +81,7 @@ const updateExpense = async (req, res) => {
     });
   }
 };
-// DELETE EXPENSE 
+//delete expense
 const deleteExpense = async (req, res) => {
   try {
     const expense = await expenseModel.findByIdAndDelete(
