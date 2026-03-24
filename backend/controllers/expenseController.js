@@ -49,34 +49,38 @@ const getAllExpense = async (req, res) => {
 
 
 //  UPDATE EXPENSE 
-const updateExpense=async (req,res) =>{
-    const {id}=req.params;
-    const userId=req.user._id;
-    const{description,amount,category,data}=req.body;
-    try{
-        const updatedExpense=await expenseModel.findOneAndUpdate(
-            {_id:id,userId},
-            {description,amount,category,date},
-            {new:true}
-        );
-        if(!updatedExpense){
-            return res.status(404).json({
-                success:false,
-                message:"Expense not Found",
-            })
-        }
-        res.json({success:true,message:"Expense updated successfully.",data:updatedExpense});
+const updateExpense = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user._id;
+  const { description, amount, category, date } = req.body;
 
+  try {
+    const updatedExpense = await expenseModel.findOneAndUpdate(
+      { _id: id, userId },
+      { description, amount, category, date },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedExpense) {
+      return res.status(404).json({
+        success: false,
+        message: "Expense not Found",
+      });
     }
-    catch (error) {
+
+    res.status(200).json({
+      success: true,
+      message: "Expense updated successfully.",
+      data: updatedExpense,
+    });
+  } catch (error) {
+    console.error("Update expense error:", error);
     res.status(500).json({
       success: false,
       message: "Server Error",
     });
   }
-    
-    
-}
+};
 // DELETE EXPENSE 
 const deleteExpense = async (req, res) => {
   try {

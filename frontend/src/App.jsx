@@ -8,7 +8,6 @@ import {
   Settings,
   Bell,
   Menu,
-  X,
   ArrowUpRight,
   ArrowDownLeft,
   LogOut,
@@ -66,16 +65,28 @@ function AuthPage({ setIsAuthenticated }) {
     email: "",
     password: "",
   });
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const toggleMode = () => {
+    setIsLogin((prev) => !prev);
+    setError("");
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+
     try {
       const endpoint = isLogin ? "/user/login" : "/user/register";
       const payload = isLogin
@@ -83,11 +94,13 @@ function AuthPage({ setIsAuthenticated }) {
         : formData;
 
       const res = await api.post(endpoint, payload);
+
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
       setIsAuthenticated(true);
       navigate("/");
     } catch (err) {
+      console.error("Auth error:", err.response?.data || err.message);
       setError(err.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
@@ -113,10 +126,6 @@ function AuthPage({ setIsAuthenticated }) {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold">Easy Transaction Tracking</h3>
-                  {/* <p className="mt-1 text-sm leading-6 text-slate-300">
-                    Add and manage your daily income and expenses in a simple and
-                    organized way.
-                  </p> */}
                 </div>
               </div>
             </div>
@@ -128,10 +137,6 @@ function AuthPage({ setIsAuthenticated }) {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold">Clear Financial Insights</h3>
-                  {/* <p className="mt-1 text-sm leading-6 text-slate-300">
-                    Understand your spending, savings, and overall financial
-                    performance at a glance.
-                  </p> */}
                 </div>
               </div>
             </div>
@@ -143,10 +148,6 @@ function AuthPage({ setIsAuthenticated }) {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold">Secure and Reliable Access</h3>
-                  {/* <p className="mt-1 text-sm leading-6 text-slate-300">
-                    Access your account safely and keep your financial records protected
-                    and available anytime.
-                  </p> */}
                 </div>
               </div>
             </div>
@@ -156,7 +157,7 @@ function AuthPage({ setIsAuthenticated }) {
         <div className="p-8 md:p-10">
           <h2 className="text-3xl font-bold">{isLogin ? "Login" : "Register"}</h2>
           <p className="mt-2 text-slate-500">
-            {isLogin ? "Apne account me login karo" : "Naya account banao"}
+            {isLogin ? "Login Your Previous Account" : "Create a New Account"}
           </p>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-4">
@@ -194,14 +195,15 @@ function AuthPage({ setIsAuthenticated }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-2xl bg-slate-950 px-4 py-3 font-semibold text-white transition hover:opacity-90"
+              className="w-full rounded-2xl bg-slate-950 px-4 py-3 font-semibold text-white transition hover:opacity-90 disabled:opacity-70"
             >
               {loading ? "Please wait..." : isLogin ? "Login" : "Register"}
             </button>
           </form>
 
           <button
-            onClick={() => setIsLogin(!isLogin)}
+            type="button"
+            onClick={toggleMode}
             className="mt-6 text-sm font-semibold text-slate-700 transition hover:text-slate-950"
           >
             {isLogin ? "Create new account" : "Already have an account? Login"}
@@ -212,19 +214,30 @@ function AuthPage({ setIsAuthenticated }) {
   );
 }
 
-function Sidebar({ sidebarOpen, setSidebarOpen }) {
+function Sidebar({ sidebarOpen, setSidebarOpen, setIsAuthenticated }) {
   const navigate = useNavigate();
 
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    setIsAuthenticated(false);
     navigate("/auth");
   };
 
   return (
     <>
-      {sidebarOpen && <div className="fixed inset-0 z-30 bg-black/40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
-      <aside className={`fixed left-0 top-0 z-40 flex h-screen w-72 flex-col bg-slate-950 text-white transition-transform duration-300 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <aside
+        className={`fixed left-0 top-0 z-40 flex h-screen w-72 flex-col bg-slate-950 text-white transition-transform duration-300 lg:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
         <div className="border-b border-slate-800 px-6 py-5">
           <h1 className="text-2xl font-bold">ExpenseFlow</h1>
           <p className="text-sm text-slate-400">Track money smartly</p>
@@ -238,7 +251,13 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
                 key={item.name}
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) => `flex items-center gap-3 rounded-2xl px-4 py-3 ${isActive ? "bg-white text-slate-950" : "text-slate-300 hover:bg-slate-900"}`}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 rounded-2xl px-4 py-3 ${
+                    isActive
+                      ? "bg-white text-slate-950"
+                      : "text-slate-300 hover:bg-slate-900"
+                  }`
+                }
               >
                 <Icon size={20} />
                 <span>{item.name}</span>
@@ -248,7 +267,11 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
         </nav>
 
         <div className="p-4">
-          <button onClick={logout} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 font-semibold text-slate-950">
+          <button
+            type="button"
+            onClick={logout}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 font-semibold text-slate-950"
+          >
             <LogOut size={18} /> Logout
           </button>
         </div>
@@ -262,17 +285,26 @@ function Navbar({ setSidebarOpen, title, user }) {
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
       <div className="flex items-center justify-between px-4 py-4 md:px-8">
         <div className="flex items-center gap-3">
-          <button className="rounded-2xl border p-2 lg:hidden" onClick={() => setSidebarOpen(true)}>
+          <button
+            type="button"
+            className="rounded-2xl border p-2 lg:hidden"
+            onClick={() => setSidebarOpen(true)}
+          >
             <Menu size={20} />
           </button>
+
           <div>
             <h2 className="text-2xl font-bold">{title}</h2>
-            <p className="text-sm text-slate-500">Backend connected expense tracker dashboard</p>
+            <p className="text-sm text-slate-500">
+              Backend connected expense tracker dashboard
+            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="rounded-2xl border p-3"><Bell size={18} /></button>
+          <button type="button" className="rounded-2xl border p-3">
+            <Bell size={18} />
+          </button>
           <div className="rounded-2xl bg-slate-950 px-4 py-2 text-white">
             <p className="text-sm font-semibold">{user?.name || "User"}</p>
             <p className="text-xs text-slate-300">{user?.email || "-"}</p>
@@ -303,7 +335,7 @@ function DashboardPage() {
       const res = await api.get("/dashboard");
       setDashboard(res.data.data);
     } catch (err) {
-      console.error(err);
+      console.error("Dashboard error:", err.response?.data || err.message);
     } finally {
       setLoading(false);
     }
@@ -318,10 +350,26 @@ function DashboardPage() {
   return (
     <main className="p-4 md:p-8">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard title="Monthly Income" value={formatCurrency(dashboard?.monthlyIncome)} extra="Current month total income" />
-        <SummaryCard title="Monthly Expense" value={formatCurrency(dashboard?.monthlyExpense)} extra="Current month total expense" />
-        <SummaryCard title="Savings" value={formatCurrency(dashboard?.savings)} extra={`Savings rate: ${dashboard?.savingsRate || 0}%`} />
-        <SummaryCard title="Categories" value={dashboard?.expenseDistribution?.length || 0} extra="Expense category distribution" />
+        <SummaryCard
+          title="Monthly Income"
+          value={formatCurrency(dashboard?.monthlyIncome)}
+          extra="Current month total income"
+        />
+        <SummaryCard
+          title="Monthly Expense"
+          value={formatCurrency(dashboard?.monthlyExpense)}
+          extra="Current month total expense"
+        />
+        <SummaryCard
+          title="Savings"
+          value={formatCurrency(dashboard?.savings)}
+          extra={`Savings rate: ${dashboard?.savingsRate || 0}%`}
+        />
+        <SummaryCard
+          title="Categories"
+          value={dashboard?.expenseDistribution?.length || 0}
+          extra="Expense category distribution"
+        />
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
@@ -329,14 +377,27 @@ function DashboardPage() {
           <h3 className="text-xl font-semibold">Recent Transactions</h3>
           <div className="mt-5 space-y-4">
             {dashboard?.recentTransactions?.slice(0, 8).map((item) => (
-              <div key={item._id} className="flex items-center justify-between rounded-2xl border border-slate-100 p-4">
+              <div
+                key={item._id}
+                className="flex items-center justify-between rounded-2xl border border-slate-100 p-4"
+              >
                 <div className="flex items-center gap-3">
-                  <div className={`rounded-2xl p-3 ${item.type === "income" ? "bg-green-100" : "bg-red-100"}`}>
-                    {item.type === "income" ? <ArrowDownLeft size={18} className="text-green-700" /> : <ArrowUpRight size={18} className="text-red-700" />}
+                  <div
+                    className={`rounded-2xl p-3 ${
+                      item.type === "income" ? "bg-green-100" : "bg-red-100"
+                    }`}
+                  >
+                    {item.type === "income" ? (
+                      <ArrowDownLeft size={18} className="text-green-700" />
+                    ) : (
+                      <ArrowUpRight size={18} className="text-red-700" />
+                    )}
                   </div>
                   <div>
                     <p className="font-semibold">{item.description}</p>
-                    <p className="text-sm text-slate-500">{item.category} • {formatDate(item.date)}</p>
+                    <p className="text-sm text-slate-500">
+                      {item.category} • {formatDate(item.date)}
+                    </p>
                   </div>
                 </div>
                 <p className="font-bold">{formatCurrency(item.amount)}</p>
@@ -352,10 +413,15 @@ function DashboardPage() {
               <div key={item.category}>
                 <div className="mb-2 flex items-center justify-between text-sm">
                   <span>{item.category}</span>
-                  <span>{formatCurrency(item.amount)} ({item.percent}%)</span>
+                  <span>
+                    {formatCurrency(item.amount)} ({item.percent}%)
+                  </span>
                 </div>
                 <div className="h-3 rounded-full bg-slate-100">
-                  <div className="h-3 rounded-full bg-slate-900" style={{ width: `${item.percent}%` }} />
+                  <div
+                    className="h-3 rounded-full bg-slate-900"
+                    style={{ width: `${item.percent}%` }}
+                  />
                 </div>
               </div>
             ))}
@@ -367,12 +433,17 @@ function DashboardPage() {
 }
 
 function TransactionForm({ type, onSuccess, editingItem, setEditingItem }) {
-  const initialState = useMemo(() => ({
-    description: editingItem?.description || "",
-    amount: editingItem?.amount || "",
-    category: editingItem?.category || "",
-    date: editingItem?.date ? new Date(editingItem.date).toISOString().split("T")[0] : "",
-  }), [editingItem]);
+  const initialState = useMemo(
+    () => ({
+      description: editingItem?.description || "",
+      amount: editingItem?.amount || "",
+      category: editingItem?.category || "",
+      date: editingItem?.date
+        ? new Date(editingItem.date).toISOString().split("T")[0]
+        : "",
+    }),
+    [editingItem]
+  );
 
   const [formData, setFormData] = useState(initialState);
   const [loading, setLoading] = useState(false);
@@ -385,39 +456,98 @@ function TransactionForm({ type, onSuccess, editingItem, setEditingItem }) {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const resetForm = () => {
+    setFormData({
+      description: "",
+      amount: "",
+      category: "",
+      date: "",
+    });
+    setEditingItem(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       setLoading(true);
+
       const endpoint = type === "income" ? "/income" : "/expense";
+
+      const payload = {
+        ...formData,
+        amount: Number(formData.amount),
+      };
+
       if (editingItem?._id) {
-        await api.put(`${endpoint}/update/${editingItem._id}`, formData);
+        await api.put(`${endpoint}/update/${editingItem._id}`, payload);
       } else {
-        await api.post(`${endpoint}/add`, formData);
+        await api.post(`${endpoint}/add`, payload);
       }
-      setFormData({ description: "", amount: "", category: "", date: "" });
-      setEditingItem(null);
-      onSuccess();
+
+      resetForm();
+      await onSuccess();
     } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Operation failed");
+      console.error("Transaction submit error:", err.response?.data || err.message);
+      alert(err.response?.data?.message || `${type} operation failed`);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 md:grid-cols-2">
-      <input name="description" value={formData.description} onChange={handleChange} placeholder={`Enter ${type} description`} className="rounded-2xl border px-4 py-3 outline-none" />
-      <input name="amount" type="number" value={formData.amount} onChange={handleChange} placeholder="Enter amount" className="rounded-2xl border px-4 py-3 outline-none" />
-      <input name="category" value={formData.category} onChange={handleChange} placeholder="Enter category" className="rounded-2xl border px-4 py-3 outline-none" />
-      <input name="date" type="date" value={formData.date} onChange={handleChange} className="rounded-2xl border px-4 py-3 outline-none" />
-      <div className="md:col-span-2 flex gap-3">
-        <button type="submit" disabled={loading} className="rounded-2xl bg-slate-950 px-5 py-3 font-semibold text-white">
+    <form
+      onSubmit={handleSubmit}
+      className="grid gap-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 md:grid-cols-2"
+    >
+      <input
+        name="description"
+        value={formData.description}
+        onChange={handleChange}
+        placeholder={`Enter ${type} description`}
+        className="rounded-2xl border px-4 py-3 outline-none"
+      />
+
+      <input
+        name="amount"
+        type="number"
+        value={formData.amount}
+        onChange={handleChange}
+        placeholder="Enter amount"
+        className="rounded-2xl border px-4 py-3 outline-none"
+      />
+
+      <input
+        name="category"
+        value={formData.category}
+        onChange={handleChange}
+        placeholder="Enter category"
+        className="rounded-2xl border px-4 py-3 outline-none"
+      />
+
+      <input
+        name="date"
+        type="date"
+        value={formData.date}
+        onChange={handleChange}
+        className="rounded-2xl border px-4 py-3 outline-none"
+      />
+
+      <div className="flex gap-3 md:col-span-2">
+        <button
+          type="submit"
+          disabled={loading}
+          className="rounded-2xl bg-slate-950 px-5 py-3 font-semibold text-white disabled:opacity-70"
+        >
           {loading ? "Saving..." : editingItem ? `Update ${type}` : `Add ${type}`}
         </button>
+
         {editingItem && (
-          <button type="button" onClick={() => setEditingItem(null)} className="rounded-2xl border px-5 py-3 font-semibold">
+          <button
+            type="button"
+            onClick={resetForm}
+            className="rounded-2xl border px-5 py-3 font-semibold"
+          >
             Cancel Edit
           </button>
         )}
@@ -437,10 +567,11 @@ function IncomePage() {
         api.get("/income/get"),
         api.get("/income/overview?range=monthly"),
       ]);
+
       setItems(listRes.data);
       setOverview(overviewRes.data.data);
     } catch (err) {
-      console.error(err);
+      console.error("Income fetch error:", err.response?.data || err.message);
     }
   };
 
@@ -449,31 +580,74 @@ function IncomePage() {
   }, []);
 
   const deleteItem = async (id) => {
-    await api.delete(`/income/delete/${id}`);
-    fetchData();
+    try {
+      await api.delete(`/income/delete/${id}`);
+      await fetchData();
+    } catch (err) {
+      console.error("Income delete error:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Delete failed");
+    }
   };
 
   return (
     <main className="space-y-6 p-4 md:p-8">
-      <TransactionForm type="income" onSuccess={fetchData} editingItem={editingItem} setEditingItem={setEditingItem} />
+      <TransactionForm
+        type="income"
+        onSuccess={fetchData}
+        editingItem={editingItem}
+        setEditingItem={setEditingItem}
+      />
+
       <div className="grid gap-4 md:grid-cols-3">
-        <SummaryCard title="Total Income" value={formatCurrency(overview?.totalIncome)} extra={`Transactions: ${overview?.numberOfTransactions || 0}`} />
-        <SummaryCard title="Average Income" value={formatCurrency(overview?.averageIncome)} extra={`Range: ${overview?.range || "monthly"}`} />
-        <a href={`${API_BASE_URL}/income/download`} className="rounded-3xl bg-slate-950 p-5 text-white">Download income excel</a>
+        <SummaryCard
+          title="Total Income"
+          value={formatCurrency(overview?.totalIncome)}
+          extra={`Transactions: ${overview?.numberOfTransactions || 0}`}
+        />
+        <SummaryCard
+          title="Average Income"
+          value={formatCurrency(overview?.averageIncome)}
+          extra={`Range: ${overview?.range || "monthly"}`}
+        />
+        <a
+          href={`${API_BASE_URL}/income/download`}
+          className="rounded-3xl bg-slate-950 p-5 text-white"
+        >
+          Download income excel
+        </a>
       </div>
+
       <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <h3 className="text-xl font-semibold">Income List</h3>
         <div className="mt-5 space-y-4">
           {items.map((item) => (
-            <div key={item._id} className="flex items-center justify-between rounded-2xl border p-4">
+            <div
+              key={item._id}
+              className="flex items-center justify-between rounded-2xl border p-4"
+            >
               <div>
                 <p className="font-semibold">{item.description}</p>
-                <p className="text-sm text-slate-500">{item.category} • {formatDate(item.date)}</p>
+                <p className="text-sm text-slate-500">
+                  {item.category} • {formatDate(item.date)}
+                </p>
               </div>
+
               <div className="flex items-center gap-3">
                 <p className="font-bold">{formatCurrency(item.amount)}</p>
-                <button onClick={() => setEditingItem(item)} className="rounded-xl border px-3 py-2">Edit</button>
-                <button onClick={() => deleteItem(item._id)} className="rounded-xl bg-red-500 px-3 py-2 text-white">Delete</button>
+                <button
+                  type="button"
+                  onClick={() => setEditingItem(item)}
+                  className="rounded-xl border px-3 py-2"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => deleteItem(item._id)}
+                  className="rounded-xl bg-red-500 px-3 py-2 text-white"
+                >
+                  Delete
+                </button>
               </div>
             </div>
           ))}
@@ -494,10 +668,11 @@ function ExpensePage() {
         api.get("/expense/get"),
         api.get("/expense/overview?range=monthly"),
       ]);
+
       setItems(listRes.data);
       setOverview(overviewRes.data.data);
     } catch (err) {
-      console.error(err);
+      console.error("Expense fetch error:", err.response?.data || err.message);
     }
   };
 
@@ -506,31 +681,74 @@ function ExpensePage() {
   }, []);
 
   const deleteItem = async (id) => {
-    await api.delete(`/expense/delete/${id}`);
-    fetchData();
+    try {
+      await api.delete(`/expense/delete/${id}`);
+      await fetchData();
+    } catch (err) {
+      console.error("Expense delete error:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Delete failed");
+    }
   };
 
   return (
     <main className="space-y-6 p-4 md:p-8">
-      <TransactionForm type="expense" onSuccess={fetchData} editingItem={editingItem} setEditingItem={setEditingItem} />
+      <TransactionForm
+        type="expense"
+        onSuccess={fetchData}
+        editingItem={editingItem}
+        setEditingItem={setEditingItem}
+      />
+
       <div className="grid gap-4 md:grid-cols-3">
-        <SummaryCard title="Total Expense" value={formatCurrency(overview?.totalExpense)} extra={`Transactions: ${overview?.numberOfTransactions || 0}`} />
-        <SummaryCard title="Average Expense" value={formatCurrency(overview?.averageExpense)} extra={`Range: ${overview?.range || "monthly"}`} />
-        <a href={`${API_BASE_URL}/expense/download`} className="rounded-3xl bg-slate-950 p-5 text-white">Download expense excel</a>
+        <SummaryCard
+          title="Total Expense"
+          value={formatCurrency(overview?.totalExpense)}
+          extra={`Transactions: ${overview?.numberOfTransactions || 0}`}
+        />
+        <SummaryCard
+          title="Average Expense"
+          value={formatCurrency(overview?.averageExpense)}
+          extra={`Range: ${overview?.range || "monthly"}`}
+        />
+        <a
+          href={`${API_BASE_URL}/expense/download`}
+          className="rounded-3xl bg-slate-950 p-5 text-white"
+        >
+          Download expense excel
+        </a>
       </div>
+
       <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <h3 className="text-xl font-semibold">Expense List</h3>
         <div className="mt-5 space-y-4">
           {items.map((item) => (
-            <div key={item._id} className="flex items-center justify-between rounded-2xl border p-4">
+            <div
+              key={item._id}
+              className="flex items-center justify-between rounded-2xl border p-4"
+            >
               <div>
                 <p className="font-semibold">{item.description}</p>
-                <p className="text-sm text-slate-500">{item.category} • {formatDate(item.date)}</p>
+                <p className="text-sm text-slate-500">
+                  {item.category} • {formatDate(item.date)}
+                </p>
               </div>
+
               <div className="flex items-center gap-3">
                 <p className="font-bold">{formatCurrency(item.amount)}</p>
-                <button onClick={() => setEditingItem(item)} className="rounded-xl border px-3 py-2">Edit</button>
-                <button onClick={() => deleteItem(item._id)} className="rounded-xl bg-red-500 px-3 py-2 text-white">Delete</button>
+                <button
+                  type="button"
+                  onClick={() => setEditingItem(item)}
+                  className="rounded-xl border px-3 py-2"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => deleteItem(item._id)}
+                  className="rounded-xl bg-red-500 px-3 py-2 text-white"
+                >
+                  Delete
+                </button>
               </div>
             </div>
           ))}
@@ -541,53 +759,144 @@ function ExpensePage() {
 }
 
 function ProfilePage({ user, refreshUser }) {
-  const [profile, setProfile] = useState({ name: user?.name || "", email: user?.email || "" });
-  const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "" });
+  const [profile, setProfile] = useState({
+    name: user?.name || "",
+    email: user?.email || "",
+  });
+
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+  });
 
   useEffect(() => {
-    setProfile({ name: user?.name || "", email: user?.email || "" });
+    setProfile({
+      name: user?.name || "",
+      email: user?.email || "",
+    });
   }, [user]);
 
   const updateProfile = async (e) => {
     e.preventDefault();
-    await api.put("/user/profile", profile);
-    refreshUser();
-    alert("Profile updated successfully");
+
+    try {
+      const res = await api.put("/user/profile", profile);
+      await refreshUser();
+      alert(res.data?.message || "Profile updated successfully");
+    } catch (err) {
+      console.error("Profile update error:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Profile update failed");
+    }
   };
 
   const updatePassword = async (e) => {
     e.preventDefault();
-    await api.put("/user/password", passwordData);
-    setPasswordData({ currentPassword: "", newPassword: "" });
-    alert("Password updated successfully");
+
+    try {
+      const res = await api.put("/user/password", {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+      });
+
+      alert(res.data?.message || "Password updated successfully");
+    } catch (err) {
+      console.error("Password update error:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Password update failed");
+    }
   };
 
   return (
     <main className="grid gap-6 p-4 md:p-8 lg:grid-cols-2">
-      <form onSubmit={updateProfile} className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 space-y-4">
+      <form
+        onSubmit={updateProfile}
+        className="space-y-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
+      >
         <h3 className="text-xl font-semibold">Update Profile</h3>
-        <input className="w-full rounded-2xl border px-4 py-3" value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} />
-        <input className="w-full rounded-2xl border px-4 py-3" value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} />
-        <button className="rounded-2xl bg-slate-950 px-5 py-3 text-white">Save Profile</button>
+
+        <input
+          type="text"
+          className="w-full rounded-2xl border px-4 py-3"
+          value={profile.name}
+          onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+        />
+
+        <input
+          type="email"
+          className="w-full rounded-2xl border px-4 py-3"
+          value={profile.email}
+          onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+        />
+
+        <button
+          type="submit"
+          className="rounded-2xl bg-slate-950 px-5 py-3 text-white"
+        >
+          Save Profile
+        </button>
       </form>
 
-      <form onSubmit={updatePassword} className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 space-y-4">
+      <form
+        onSubmit={updatePassword}
+        className="space-y-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
+      >
         <h3 className="text-xl font-semibold">Change Password</h3>
-        <input type="password" placeholder="Current password" className="w-full rounded-2xl border px-4 py-3" value={passwordData.currentPassword} onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })} />
-        <input type="password" placeholder="New password" className="w-full rounded-2xl border px-4 py-3" value={passwordData.newPassword} onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })} />
-        <button className="rounded-2xl bg-slate-950 px-5 py-3 text-white">Update Password</button>
+
+        <input
+          type="password"
+          placeholder="Current password"
+          className="w-full rounded-2xl border px-4 py-3"
+          value={passwordData.currentPassword}
+          onChange={(e) =>
+            setPasswordData({
+              ...passwordData,
+              currentPassword: e.target.value,
+            })
+          }
+        />
+
+        <input
+          type="password"
+          placeholder="New password"
+          className="w-full rounded-2xl border px-4 py-3"
+          value={passwordData.newPassword}
+          onChange={(e) =>
+            setPasswordData({
+              ...passwordData,
+              newPassword: e.target.value,
+            })
+          }
+        />
+
+        <button
+          type="submit"
+          className="rounded-2xl bg-slate-950 px-5 py-3 text-white"
+        >
+          Update Password
+        </button>
       </form>
     </main>
   );
 }
 
 function SettingsPage() {
-  return <main className="p-8"><div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">Settings page ready.</div></main>;
+  return (
+    <main className="p-8">
+      <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        Settings page ready.
+      </div>
+    </main>
+  );
 }
 
 function ProtectedLayout({ setIsAuthenticated }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
+
   const navigate = useNavigate();
 
   const refreshUser = async () => {
@@ -596,6 +905,7 @@ function ProtectedLayout({ setIsAuthenticated }) {
       setUser(res.data.user);
       localStorage.setItem("user", JSON.stringify(res.data.user));
     } catch (err) {
+      console.error("User refresh error:", err.response?.data || err.message);
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       setIsAuthenticated(false);
@@ -610,14 +920,59 @@ function ProtectedLayout({ setIsAuthenticated }) {
   return (
     <div className="min-h-screen bg-slate-100">
       <div className="flex">
-        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <Sidebar
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          setIsAuthenticated={setIsAuthenticated}
+        />
+
         <div className="min-h-screen flex-1 lg:ml-72">
           <Routes>
-            <Route path="/" element={<><Navbar setSidebarOpen={setSidebarOpen} title="Dashboard" user={user} /><DashboardPage /></>} />
-            <Route path="/income" element={<><Navbar setSidebarOpen={setSidebarOpen} title="Income" user={user} /><IncomePage /></>} />
-            <Route path="/expenses" element={<><Navbar setSidebarOpen={setSidebarOpen} title="Expenses" user={user} /><ExpensePage /></>} />
-            <Route path="/profile" element={<><Navbar setSidebarOpen={setSidebarOpen} title="Profile" user={user} /><ProfilePage user={user} refreshUser={refreshUser} /></>} />
-            <Route path="/settings" element={<><Navbar setSidebarOpen={setSidebarOpen} title="Settings" user={user} /><SettingsPage /></>} />
+            <Route
+              path="/"
+              element={
+                <>
+                  <Navbar setSidebarOpen={setSidebarOpen} title="Dashboard" user={user} />
+                  <DashboardPage />
+                </>
+              }
+            />
+            <Route
+              path="/income"
+              element={
+                <>
+                  <Navbar setSidebarOpen={setSidebarOpen} title="Income" user={user} />
+                  <IncomePage />
+                </>
+              }
+            />
+            <Route
+              path="/expenses"
+              element={
+                <>
+                  <Navbar setSidebarOpen={setSidebarOpen} title="Expenses" user={user} />
+                  <ExpensePage />
+                </>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <>
+                  <Navbar setSidebarOpen={setSidebarOpen} title="Profile" user={user} />
+                  <ProfilePage user={user} refreshUser={refreshUser} />
+                </>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <>
+                  <Navbar setSidebarOpen={setSidebarOpen} title="Settings" user={user} />
+                  <SettingsPage />
+                </>
+              }
+            />
           </Routes>
         </div>
       </div>
@@ -626,13 +981,27 @@ function ProtectedLayout({ setIsAuthenticated }) {
 }
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    !!localStorage.getItem("token")
+  );
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/auth" element={<AuthPage setIsAuthenticated={setIsAuthenticated} />} />
-        <Route path="/*" element={isAuthenticated ? <ProtectedLayout setIsAuthenticated={setIsAuthenticated} /> : <AuthPage setIsAuthenticated={setIsAuthenticated} />} />
+        <Route
+          path="/auth"
+          element={<AuthPage setIsAuthenticated={setIsAuthenticated} />}
+        />
+        <Route
+          path="/*"
+          element={
+            isAuthenticated ? (
+              <ProtectedLayout setIsAuthenticated={setIsAuthenticated} />
+            ) : (
+              <AuthPage setIsAuthenticated={setIsAuthenticated} />
+            )
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
