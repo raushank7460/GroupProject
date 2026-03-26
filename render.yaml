@@ -2,10 +2,9 @@ services:
   - type: web
     name: expense-backend
     env: node
-    
     rootDir: backend
-    buildCommand: npm install
-    startCommand: npm start
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
     envVars:
       - key: PORT
         value: 7000
@@ -13,7 +12,6 @@ services:
   - type: web
     name: expense-frontend
     env: static
-    
     rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: build
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/build
