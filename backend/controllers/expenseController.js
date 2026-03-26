@@ -1,5 +1,5 @@
 const expenseModel = require("../models/expenseModel.js");
-// const XLSX = require("xlsx");
+const XLSX = require("xlsx");
 const getDateRange = require("../utils/dateFilter.js");
 
 // ADD EXPENSE 
@@ -110,36 +110,50 @@ const deleteExpense = async (req, res) => {
 };
 
 // DOWNLOAD EXCEL
-// const downloadExpenseExcel = async (req, res) => {
-//   try {
-//     const expense = await expenseModel
-//       .find({ userId: req.user._id })
-//       .sort({ date: -1 });
+const downloadExpenseExcel = async (req, res) => {
+  try {
+    const expense = await expenseModel
+      .find({ userId: req.user._id })
+      .sort({ date: -1 });
 
-//     const data = expense.map((exp) => ({
-//       Description: exp.description,
-//       Amount: exp.amount,
-//       Category: exp.category,
-//       Date: new Date(exp.date).toLocaleDateString(),
-//     }));
+    const data = expense.map((exp) => ({
+      Description: exp.description,
+      Amount: exp.amount,
+      Category: exp.category,
+      Date: new Date(exp.date).toLocaleDateString(),
+    }));
 
-//     const workbook = XLSX.utils.book_new();
-//     const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(data);
 
-//     XLSX.utils.book_append_sheet(workbook, worksheet, "expenseModel");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Expenses");
 
-//      XLSX.writeFile(workbook,"Expense_details.xlsx");
+    // Excel buffer generate
+    const buffer = XLSX.write(workbook, {
+      type: "buffer",
+      bookType: "xlsx",
+    });
 
-   
+    // Headers set
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=Expense_details.xlsx"
+    );
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
 
-//     res.download("Expense_details.xlsx");
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: "Excel download failed",
-//     });
-//   }
-// };
+    // Send file directly
+    res.send(buffer);
+  } catch (error) {
+    console.error("Excel download error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Excel download failed",
+    });
+  }
+};
 
 //  EXPENSE OVERVIEW 
 
@@ -185,6 +199,6 @@ module.exports = {
   getAllExpense,
   updateExpense,
   deleteExpense,
-  // downloadExpenseExcel,
+  downloadExpenseExcel,
   getExpenseOverview,
 };

@@ -7,7 +7,7 @@ const {
   getAllExpense,
   updateExpense,
   deleteExpense,
-  // downloadExpenseExcel,
+  downloadExpenseExcel,
   getExpenseOverview,
 } = require("../controllers/expenseController.js");
 
@@ -28,7 +28,7 @@ expressRouter.put("/update/:id", authMiddleware, updateExpense);
 expressRouter.delete("/delete/:id", authMiddleware, deleteExpense);
 
 //  Download Excel
-// expressRouter.get("/download", authMiddleware, downloadExpenseExcel);
+expressRouter.get("/download", authMiddleware, downloadExpenseExcel);
 
 //  Overview
 expressRouter.get("/overview", authMiddleware, getExpenseOverview);

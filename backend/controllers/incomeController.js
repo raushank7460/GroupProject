@@ -1,4 +1,4 @@
-// const XLSX = require("xlsx");
+const XLSX = require("xlsx");
 const incomeModel = require("../models/incomeModel.js");
 const  getDateRange=require("../utils/dateFilter.js");
 
@@ -112,46 +112,54 @@ const deleteIncome = async (req, res) => {
   }
 };
 
-// download Income data 
-// const downloadIncomeExcel = async (req, res) => {
-//   const userId = req.user._id;
+// 
+const downloadIncomeExcel = async (req, res) => {
+  const userId = req.user._id;
 
-//   try {
-//     const income = await incomeModel
-//       .find({ userId })
-//       .sort({ date: -1 });
+  try {
+    const income = await incomeModel
+      .find({ userId })
+      .sort({ date: -1 });
 
-//     const plainData = income.map((inc) => ({
-//       Description: inc.description,
-//       Amount: inc.amount,
-//       Category: inc.category,
-//       Date: new Date(inc.date).toLocaleDateString(),
-//     }));
+    const plainData = income.map((inc) => ({
+      Description: inc.description,
+      Amount: inc.amount,
+      Category: inc.category,
+      Date: new Date(inc.date).toLocaleDateString(),
+    }));
 
-//     // Excel create
-//     const workbook = XLSX.utils.book_new();
-//     const worksheet = XLSX.utils.json_to_sheet(plainData);
+    // Excel create
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(plainData);
 
-//     XLSX.utils.book_append_sheet(workbook, worksheet, "incomeModel");
-//     XLSX.writeFile(workbook,"income_details.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Income");
 
-//     res.download("income_details.xlsx");
+    // Buffer generate
+    const buffer = XLSX.write(workbook, {
+      type: "buffer",
+      bookType: "xlsx",
+    });
 
+    // Headers
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=income_details.xlsx"
+    );
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
 
-    
-
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Excel download failed",
-//     });
-//   }
-// };
-
-
-
-
+    // Send directly
+    res.send(buffer);
+  } catch (error) {
+    console.error("Income Excel download error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Excel download failed",
+    });
+  }
+};
 //  INCOME OVERVIEW 
 const getIncomeOverview = async (req, res) => {
   try {
@@ -200,7 +208,7 @@ module.exports = {
   getAllIncome,
   updateIncome,
   deleteIncome,
-  // downloadIncomeExcel,
+   downloadIncomeExcel,
   getIncomeOverview,
 
 };
