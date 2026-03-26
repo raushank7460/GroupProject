@@ -6,7 +6,7 @@ const {
   registerUser,
   updatePassword,
   updateProfile
-} = require("../controllers/userContoller.js"); 
+} = require("../controllers/userController.js"); 
 
 const authMiddleware = require("../middleware/auth.js");
 
