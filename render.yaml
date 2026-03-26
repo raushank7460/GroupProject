@@ -3,8 +3,8 @@ services:
     name: expense-backend
     env: node
     rootDir: backend
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && npm start
+    buildCommand: cd backend && node install
+    startCommand: cd backend && node start
     envVars:
       - key: PORT
         value: 7000
