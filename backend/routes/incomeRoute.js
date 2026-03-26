@@ -6,7 +6,7 @@ const {
   getAllIncome,
   updateIncome,
   deleteIncome,
-  downloadIncomeExcel,
+  // downloadIncomeExcel,
   getIncomeOverview,
 } = require("../controllers/incomeController.js");
 
@@ -27,7 +27,7 @@ incomeRouter.put("/update/:id", authMiddleware, updateIncome);
 incomeRouter.delete("/delete/:id", authMiddleware, deleteIncome);
 
 //  Download Excel
-incomeRouter.get("/download", authMiddleware, downloadIncomeExcel);
+// incomeRouter.get("/download", authMiddleware, downloadIncomeExcel);
 
 //  Income Overview (filter: daily/weekly/monthly/yearly)
 incomeRouter.get("/overview", authMiddleware, getIncomeOverview);
