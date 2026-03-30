@@ -1169,11 +1169,13 @@ function ProtectedLayout({ setIsAuthenticated }) {
       const updatedUser = data?.user || data?.data?.user || data?.data || user || null;
       setUser(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser || {}));
-    } catch (err) {
+     } catch (err) {
       console.error("User refresh error:", err);
-      localStorage.clear();
-      setIsAuthenticated(false);
-      navigate("/auth");
+      if (err.response?.status === 401) {
+        localStorage.clear();
+        setIsAuthenticated(false);
+        navigate("/auth");
+      }
     }
   }, [navigate, setIsAuthenticated, user]);
 
