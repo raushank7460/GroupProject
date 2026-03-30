@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db.js");
@@ -8,7 +9,7 @@ const dashboardRouter = require("./routes/dashboardRoute.js");
 const path = require("path");
 
 
-require("dotenv").config();
+
 
 const app = express();
 const port = process.env.PORT || 7001; // changed from 7000 to 7001
